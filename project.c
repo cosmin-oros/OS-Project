@@ -8,6 +8,23 @@
 
 #define N 100
 
+int isRegularFile(const char *path) {
+    struct stat path_stat;
+    if (stat(path, &path_stat) != 0) {
+        return 0; // failed to get file status
+    }
+    return S_ISREG(path_stat.st_mode);
+}
+
+int isSymbolicLink(const char *path)
+{
+    struct stat path_stat;
+    if (lstat(path, &path_stat) != 0) {
+        return 0; // failed to get file status
+    }
+    return S_ISLNK(path_stat.st_mode);
+}
+
 // function that computes the operations on a regular file
 void regularFileMenu(char* file) {
     char options[N];
@@ -39,9 +56,29 @@ void symbolicLinkMenu(char* file) {
     // read the string from stdin
     fgets(options, N, stdin);
     
+    // use switch 
 }
 
 int main(int argc, char** argv) {
+    // check if there were arguments passed
+    if (argc > 1)
+    {
+        for (int i = 1; i < argc; i++)
+        {
+            // check if it's a regular file / symbolic link
+            if (isRegularFile(argv[i]))
+            {
+                regularFileMenu(argv[i]);
+            } else if (isSymbolicLink(argv[i]))
+            {
+                symbolicLinkMenu(argv[i]);
+            }
+            
+        }
+        
+    } else {
+        printf("Pass as arguments paths to regular files / directories / symbolic links\n");
+    }
     
 
     return 0;
