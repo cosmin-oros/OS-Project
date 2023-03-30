@@ -40,6 +40,57 @@ void regularFileMenu(char* file) {
     // read the string from stdin
     fgets(options, N, stdin);
 
+    // j - the index of '-'
+    int j;
+    // check if the input was valid
+    for(int i = 0; i < strlen(options); i++) {
+        if(options[i] == '-') {
+            j = i;
+            break;
+        }
+    }
+    if(j != -1) {
+        // check if there are any non-whitespace characters before the dash
+        for(int i = 0; i < j; i++) {
+            if(!isspace(options[i])) {
+                printf("Error: Invalid input\n");
+                return 0;
+            }
+        }
+
+        // if we get here it means that the input is valid
+        // we compute the operations received from the input
+        for (int i = 0; i < strlen(options); i++)
+        {
+            switch (options[i])
+            {
+            case 'n':
+                
+                break;
+            case 'd':
+
+                break;
+            case 'h':
+
+                break;
+            case 'm':
+
+                break;
+            case 'a':
+
+                break;
+            case 'l':
+
+                break;
+            default:
+                break;
+            }
+        }
+        
+        
+    } else {
+        printf("Error: Invalid input\n");
+    }
 }
 
 // function that computes the operations on a symbolic link
@@ -56,7 +107,55 @@ void symbolicLinkMenu(char* file) {
     // read the string from stdin
     fgets(options, N, stdin);
     
-    // use switch 
+    // j - the index of '-'
+    int j;
+    // check if the input was valid
+    for(int i = 0; i < strlen(options); i++) {
+        if(options[i] == '-') {
+            j = i;
+            break;
+        }
+    }
+    if(j != -1) {
+        // check if there are any non-whitespace characters before the dash
+        for(int i = 0; i < j; i++) {
+            if(!isspace(options[i])) {
+                printf("Error: Invalid input\n");
+                return 0;
+            }
+        }
+
+        // if we get here it means that the input is valid
+        // we compute the operations received from the input
+        for (int i = 0; i < strlen(options); i++)
+        {
+            switch (options[i])
+            {
+            case 'n':
+                
+                break;
+            case 'l':
+
+                break;
+            case 'd':
+
+                break;
+            case 't':
+
+                break;
+            case 'a':
+            
+                break;
+            default:
+                break;
+            }
+        }
+        
+        
+    } else {
+        printf("Error: Invalid input\n");
+    }
+    
 }
 
 int main(int argc, char** argv) {
