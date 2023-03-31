@@ -25,9 +25,34 @@ int isSymbolicLink(const char *path)
     return S_ISLNK(path_stat.st_mode);
 }
 
+int checkValidity(char* options, int j, int type) {
+    // check if there are any non-whitespace characters before the dash
+    for(int i = 0; i < j; i++) {
+        if(!isspace(options[i])) {
+            return 0;
+        }
+    }
+
+    // check if there are invalid options and if so ask for the input again
+    for (int i = j + 1; i < strlen(options); i++)
+    {
+        if (options[i] != 'n' && options[i] != 'l' && options[i] != 'd' && options[i] != 't' && options[i] != 'a' && type == 1)
+        {
+            return 0;
+        } else if (options[i] != 'n' && options[i] != 'd' && options[i] != 'h' && options[i] != 'm' && options[i] != 'a' && options[i] != 'l' && type == 0)
+        {
+            return 0;
+        }
+        
+    }
+
+    return 1;
+}
+
 // function that computes the operations on a regular file
 void regularFileMenu(char* file) {
     char options[N];
+    struct stat st;
     printf("---- Menu ----\n");
     printf("  * n: display file name\n");
     printf("  * d: display file size\n");
@@ -50,12 +75,14 @@ void regularFileMenu(char* file) {
         }
     }
     if(j != -1) {
-        // check if there are any non-whitespace characters before the dash
-        for(int i = 0; i < j; i++) {
-            if(!isspace(options[i])) {
-                printf("Error: Invalid input\n");
-                return 0;
-            }
+        // 0 -> regular file type
+        while (!checkValidity(options, j, 0))
+        {
+            printf("Error: Invalid options\n");
+            printf("Please enter your options\n\n");
+            printf("STANDARD INPUT:");
+            // read the string from stdin
+            fgets(options, N, stdin);
         }
 
         // if we get here it means that the input is valid
@@ -65,22 +92,29 @@ void regularFileMenu(char* file) {
             switch (options[i])
             {
             case 'n':
-                
+                printf("File name: %s\n", file);
                 break;
             case 'd':
-
+                 printf("File size: %ld bytes\n", (long)st.st_size);
                 break;
             case 'h':
-
+                printf("Hard link count: %ld\n", (long)st.st_nlink);
                 break;
             case 'm':
-
+                printf("Time of last modification: %s", ctime(&st.st_mtime));
                 break;
             case 'a':
-
+                printf("Access rights: ");
+                
                 break;
             case 'l':
-
+                char link_name[256];
+                printf("Enter name of the link: ");
+                scanf("%s", link_name);
+                // create symbolic link
+                if (symlink(file, link_name) < 0) {
+                    printf("Error: Cannot create symbolic link '%s'\n", link_name);
+                }
                 break;
             default:
                 break;
@@ -96,6 +130,7 @@ void regularFileMenu(char* file) {
 // function that computes the operations on a symbolic link
 void symbolicLinkMenu(char* file) {
     char options[N];
+    struct stat st;
     printf("---- Menu ----\n");
     printf("  * n: display file name\n");
     printf("  * l: delete symbolic link\n");
@@ -108,7 +143,7 @@ void symbolicLinkMenu(char* file) {
     fgets(options, N, stdin);
     
     // j - the index of '-'
-    int j;
+    int j = -1;
     // check if the input was valid
     for(int i = 0; i < strlen(options); i++) {
         if(options[i] == '-') {
@@ -117,12 +152,14 @@ void symbolicLinkMenu(char* file) {
         }
     }
     if(j != -1) {
-        // check if there are any non-whitespace characters before the dash
-        for(int i = 0; i < j; i++) {
-            if(!isspace(options[i])) {
-                printf("Error: Invalid input\n");
-                return 0;
-            }
+        // 1 -> symbolic link type
+        while (!checkValidity(options, j, 1))
+        {
+            printf("Error: Invalid options\n");
+            printf("Please enter your options\n\n");
+            printf("STANDARD INPUT:");
+            // read the string from stdin
+            fgets(options, N, stdin);
         }
 
         // if we get here it means that the input is valid
@@ -132,10 +169,12 @@ void symbolicLinkMenu(char* file) {
             switch (options[i])
             {
             case 'n':
-                
+                printf("File name: %s\n", file);
                 break;
             case 'l':
-
+                if (unlink(file) < 0) {
+                    printf("Error: Cannot delete symbolic link '%s'\n", file);
+                }
                 break;
             case 'd':
 
@@ -153,7 +192,7 @@ void symbolicLinkMenu(char* file) {
         
         
     } else {
-        printf("Error: Invalid input\n");
+        printf("Error: Invalid input, missing '-'\n");
     }
     
 }
