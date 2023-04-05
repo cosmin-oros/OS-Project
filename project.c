@@ -52,6 +52,7 @@ int checkValidity(char* options, int j, int type) {
 // function that computes the operations on a regular file
 void regularFileMenu(char* file) {
     char options[N];
+    char link_name[256];
     struct stat st;
     printf("---- Menu ----\n");
     printf("  * n: display file name\n");
@@ -104,11 +105,25 @@ void regularFileMenu(char* file) {
                 printf("Time of last modification: %s", ctime(&st.st_mtime));
                 break;
             case 'a':
-                printf("Access rights: ");
-                
+                printf("Access rights: \n");
+
+                printf("User:\n");
+                st.st_mode & S_IRUSR ? printf("Read - yes\n") : printf("Read - no\n");
+                st.st_mode & S_IWUSR ? printf("Write - yes\n") : printf("Write - no\n");
+                st.st_mode & S_IXUSR ? printf("Execute - yes\n") : printf("Execute - no\n");
+                    
+                printf("Group:\n");
+                st.st_mode & S_IRGRP ? printf("Read - yes\n") : printf("Read - no\n");
+                st.st_mode & S_IWGRP ? printf("Write - yes\n") : printf("Write - no\n");
+                st.st_mode & S_IXGRP ? printf("Execute - yes\n") : printf("Execute - no\n");
+
+                printf("Other:\n");
+                st.st_mode & S_IROTH ? printf("Read - yes\n") : printf("Read - no\n");
+                st.st_mode & S_IWOTH ? printf("Write - yes\n") : printf("Write - no\n");
+                st.st_mode & S_IXOTH ? printf("Execute - yes\n") : printf("Execute - no\n");
+
                 break;
             case 'l':
-                char link_name[256];
                 printf("Enter name of the link: ");
                 scanf("%s", link_name);
                 // create symbolic link
