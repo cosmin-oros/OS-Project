@@ -84,6 +84,13 @@ void regularFileMenu(char* file) {
             printf("STANDARD INPUT:");
             // read the string from stdin
             fgets(options, N, stdin);
+
+            for(int i = 0; i < strlen(options); i++) {
+                if(options[i] == '-') {
+                    j = i;
+                    break;
+                }
+            }
         }
 
         // if we get here it means that the input is valid
@@ -175,6 +182,13 @@ void symbolicLinkMenu(char* file) {
             printf("STANDARD INPUT:");
             // read the string from stdin
             fgets(options, N, stdin);
+
+            for(int i = 0; i < strlen(options); i++) {
+                if(options[i] == '-') {
+                    j = i;
+                    break;
+                }
+            }
         }
 
         // if we get here it means that the input is valid
@@ -192,12 +206,28 @@ void symbolicLinkMenu(char* file) {
                 }
                 break;
             case 'd':
-
+                printf("Size of symbolic link '%s': %lu bytes\n", file, (long)st.st_size);
                 break;
             case 't':
-
+                printf("Size of target file '%s': %lu bytes\n", file, (long)st.st_size);
                 break;
             case 'a':
+            printf("Access rights: \n");
+
+            printf("User:\n");
+            st.st_mode & S_IRUSR ? printf("Read - yes\n") : printf("Read - no\n");
+            st.st_mode & S_IWUSR ? printf("Write - yes\n") : printf("Write - no\n");
+            st.st_mode & S_IXUSR ? printf("Execute - yes\n") : printf("Execute - no\n");
+                    
+            printf("Group:\n");
+            st.st_mode & S_IRGRP ? printf("Read - yes\n") : printf("Read - no\n");
+            st.st_mode & S_IWGRP ? printf("Write - yes\n") : printf("Write - no\n");
+            st.st_mode & S_IXGRP ? printf("Execute - yes\n") : printf("Execute - no\n");
+
+            printf("Other:\n");
+            st.st_mode & S_IROTH ? printf("Read - yes\n") : printf("Read - no\n");
+            st.st_mode & S_IWOTH ? printf("Write - yes\n") : printf("Write - no\n");
+            st.st_mode & S_IXOTH ? printf("Execute - yes\n") : printf("Execute - no\n");
             
                 break;
             default:
