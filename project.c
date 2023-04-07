@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
+#include <dirent.h>
 
 #define N 100
 
@@ -16,13 +17,20 @@ int isRegularFile(const char *path) {
     return S_ISREG(path_stat.st_mode);
 }
 
-int isSymbolicLink(const char *path)
-{
+int isSymbolicLink(const char *path) {
     struct stat path_stat;
     if (lstat(path, &path_stat) != 0) {
         return 0; // failed to get file status
     }
     return S_ISLNK(path_stat.st_mode);
+}
+
+int isDirectory(const char *path) {
+    struct stat path_stat;
+    if (stat(path, &path_stat) != 0) {
+        return 0; // failed to get file status
+    }
+    return S_ISDIR(path_stat.st_mode);
 }
 
 int checkValidity(char* options, int j, int type) {
@@ -248,14 +256,26 @@ int main(int argc, char** argv) {
     {
         for (int i = 1; i < argc; i++)
         {
-            // check if it's a regular file / symbolic link
+            // check if it's a regular file / directory / symbolic link
             if (isRegularFile(argv[i]))
             {
                 regularFileMenu(argv[i]);
             } else if (isSymbolicLink(argv[i]))
             {
                 symbolicLinkMenu(argv[i]);
+            } else if (isDirectory(argv[i]))
+            {
+                // open directory and display the menu for each file there
+                DIR *dir = opendir(argv[i]);
+                if (dir != NULL) {
+                    struct dirent *file;
+                    while ((file = readdir(dir)) != NULL) {
+                        regularFileMenu(file->d_name);
+                    }
+                    closedir(dir);
+                }
             }
+            
             
         }
         
