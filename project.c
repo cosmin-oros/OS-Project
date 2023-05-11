@@ -11,194 +11,211 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 
-void get_filename(char path[1024], char filename[1024]){
+// function to extract filename from path
+void get_filename(char path[1024], char filename[1024]) {
     int len = strlen(path);
     int count = 0, j = len;
 
-    while(path[j]!='/' && j>=0){
+    // find the last '/' in the path
+    while (path[j] != '/' && j >= 0) {
         j--;
     }
 
-    while(j!=len){
+    // extract the filename from the path
+    while (j != len) {
         filename[count++] = path[++j];
     }
-    
 }
 
-//function to print the type of the file
-void print_type(struct stat buf){
-
-    //check POSIX flags
-    if(S_ISREG(buf.st_mode)){
+// function to print the type of file (regular file, directory, symbolic link)
+void print_type(struct stat buf) {
+    // check POSIX flags to determine the file type
+    if (S_ISREG(buf.st_mode)) {
         printf("REGULAR\n");
         return;
-    }
-
-    else if(S_ISDIR(buf.st_mode)){
+    } else if (S_ISDIR(buf.st_mode)) {
         printf("DIRECTORY\n");
         return;
-    }
-
-    else if(S_ISLNK((buf.st_mode))){
+    } else if (S_ISLNK(buf.st_mode)) {
         printf("SYMBOLIC LINK\n");
         return;
     }
 }
 
-
-//function that prints the menu, based on the type of the file
-void menu(struct stat buf){
+// function to print the menu for a given file type
+void menu(struct stat buf) {
     printf("---- MENU ----\n");
-
-    if(S_ISREG(buf.st_mode)){
+    if (S_ISREG(buf.st_mode)) {
+        // if file is a regular file
         printf("\u2022 n: name\n\u2022 d: size\n\u2022 h: hard link count\n\u2022 m: time of last modification\n\u2022 a: access rights\n\u2022 l: create symbolic link\n");
         return;
     }
-
-    if(S_ISDIR(buf.st_mode)){
+    if (S_ISDIR(buf.st_mode)) {
+        // if file is a directory
         printf("\u2022 n: name\n\u2022 d: size\n\u2022 a: access rights\n\u2022 c: total number of files with .c extension\n");
         return;
     }
-
-    if(S_ISLNK(buf.st_mode)){
+    if (S_ISLNK(buf.st_mode)) {
+        // if file is a symbolic link
         printf("\u2022 n: name\n\u2022 l: delete symbolic link\n\u2022 d: size of symbolic link\n\u2022 t: size of target file\n\u2022 a: access rights\n");
         return;
     }
 }
 
+// This function waits for child processes to terminate and prints a message indicating whether the process terminated normally or abnormally.
 void wait_for_children(){
-    pid_t awaited_child;
-    int status;
+    pid_t awaited_child; // Declare variable to store the id of the awaited child process.
+    int status; // Declare variable to store the status of the awaited child process.
 
+    // Wait for a child process to terminate and store its id in the awaited_child variable, while also storing its status in the status variable.
     awaited_child = wait(&status);
 
+    // Enter a loop that continues as long as there are still child processes to wait for.
     while(awaited_child > 0){
-        if(WIFEXITED(status)){
+        // If the child process terminated normally, print a message indicating its id and exit status code.
+        if(WIFEXITED(status)){ 
             printf("Child process with pid %d has terminated normally with code %d.\n\n", awaited_child, WEXITSTATUS(status));
         }
+        // If the child process terminated abnormally, print a message indicating its id and exit status code.
         else{
             printf("Child process with pid %d has terminated abnormally with code %d.\n\n", awaited_child, WEXITSTATUS(status));
         }
 
+        // Wait for the next child process to terminate and update the awaited_child and status variables.
         awaited_child = wait(&status);
     }
 }
 
+// This function prints the access rights for a file, given its stat buffer.
 void print_access_rights(struct stat buf){
+    // Print the access rights for the user.
     printf("User:\n");
-        if(buf.st_mode & S_IRUSR){
-            printf("Read: YES\n");
-        }
-        else{
-            printf("Read: NO\n");
-        }
+    if(buf.st_mode & S_IRUSR){
+        printf("Read: YES\n");
+    }
+    else{
+        printf("Read: NO\n");
+    }
 
-        if(buf.st_mode & S_IWUSR){
-            printf("Write: YES\n");
-        }
-        else{
-            printf("Write: NO\n");
-        }
+    if(buf.st_mode & S_IWUSR){
+        printf("Write: YES\n");
+    }
+    else{
+        printf("Write: NO\n");
+    }
 
-        if(buf.st_mode & S_IXUSR){
-            printf("Exec: YES\n");
-        }
-        else{
-            printf("Exec: NO\n");
-        }
+    if(buf.st_mode & S_IXUSR){
+        printf("Exec: YES\n");
+    }
+    else{
+        printf("Exec: NO\n");
+    }
 
+    // Print the access rights for the group.
     printf("Group:\n");
-        if(buf.st_mode & S_IRGRP){
-            printf("Read: YES\n");
-        }
-        else{
-            printf("Read: NO\n");
-        }
+    if(buf.st_mode & S_IRGRP){
+        printf("Read: YES\n");
+    }
+    else{
+        printf("Read: NO\n");
+    }
 
-        if(buf.st_mode & S_IWGRP){
-            printf("Write: YES\n");
-        }
-        else{
-            printf("Write: NO\n");
-        }
+    if(buf.st_mode & S_IWGRP){
+        printf("Write: YES\n");
+    }
+    else{
+        printf("Write: NO\n");
+    }
 
-        if(buf.st_mode & S_IXGRP){
-            printf("Exec: YES\n");
-        }
-        else{
-            printf("Exec: NO\n");
-        }
+    if(buf.st_mode & S_IXGRP){
+        printf("Exec: YES\n");
+    }
+    else{
+        printf("Exec: NO\n");
+    }
 
+    // Print the access rights for others.
     printf("Others:\n");
-        if(buf.st_mode & S_IROTH){
-            printf("Read: YES\n");
-        }
-        else{
-            printf("Read: NO\n");
-        }
+    if(buf.st_mode & S_IROTH){
+        printf("Read: YES\n");
+    }
+    else{
+        printf("Read: NO\n");
+    }
 
-        if(buf.st_mode & S_IWOTH){
-            printf("Write: YES\n");
-        }
-        else{
-            printf("Write: NO\n");
-        }
+    if(buf.st_mode & S_IWOTH){
+        printf("Write: YES\n");
+    }
+    else{
+        printf("Write: NO\n");
+    }
 
-        if(buf.st_mode & S_IXOTH){
-            printf("Exec: YES\n");
-        }
-        else{
-            printf("Exec: NO\n");
-        }
+    if(buf.st_mode & S_IXOTH){
+        printf("Exec: YES\n");
+    }
+    else{
+        printf("Exec: NO\n");
+    }
 }
 
-int count_lines(char *path){                          
+int count_lines(char *path) {
+    // Open the file with read-only mode
     FILE *f = fopen(path, "r");
 
-    if(f==NULL){
+    // Check if the file was opened successfully
+    if(f == NULL) {
         perror(strerror(errno));
         exit(errno);
     }
 
+    // Initialize variables
     char c;
-    int lines=0, is_empty=1;
+    int lines = 0, is_empty = 1;
 
-    while ((c = fgetc(f)) != EOF){
-        if(c!=EOF){
+    // Loop through the file until the end
+    while((c = fgetc(f)) != EOF) {
+        // Check if the file is not empty
+        if(c != EOF) {
             is_empty = 0;
         }
 
-        if (c == '\n'){
+        // Count the number of lines
+        if(c == '\n') {
             lines++;
         }
     }
 
-    if(is_empty==1){
+    // If the file is empty, return 0. Otherwise, return the number of lines + 1
+    if(is_empty == 1) {
         return 0;
     }
-    else{
+    else {
         return lines + 1;
     }
 
+    // Close the file
     fclose(f);
     return lines;
 }
 
 void c_extension_work(char* path, struct stat buf){
+
     char filename[1024];
-    get_filename(path, filename);
+    get_filename(path, filename); // function not shown, gets the filename from the path
+
     pid_t pid2;
 
-    pid2 = fork();
-    if(pid2 < 0){
-        perror(strerror(errno));
-        exit(errno);
+    pid2 = fork(); // create a child process
+    if(pid2 < 0){ // fork failed
+        perror(strerror(errno)); // print an error message
+        exit(errno); // exit with an error code
     }
 
-    else if(pid2 == 0){
-        if(filename[strlen(filename)-1]=='c' && filename[strlen(filename)-2]=='.'){
+    else if(pid2 == 0){ // child process
+        if(filename[strlen(filename)-1]=='c' && filename[strlen(filename)-2]=='.'){ // if the file has a .c extension
             int errors = 0, warnings = 0, score;
 
+            // calculate the score based on the number of errors and warnings
             if(errors == 0 && warnings == 0){
                 score = 10;
             }
@@ -216,52 +233,50 @@ void c_extension_work(char* path, struct stat buf){
             }
 
             int fd;
-            fd = open("grades.txt", O_RDWR | O_CREAT);
-            if(fd == -1){
-                perror(strerror(errno));
-                exit(errno);
+            fd = open("grades.txt", O_RDWR | O_CREAT); // open a file for writing
+            if(fd == -1){ // check if opening the file failed
+                perror(strerror(errno)); // print an error message
+                exit(errno); // exit with an error code
             }
-
-            char filename[1024];
-            get_filename(path, filename);
 
             char score_string[3];
-            score_string[0] = score / 10 + '0';
-            score_string[1] = score % 10 + '0';
+            score_string[0] = score / 10 + '0'; // convert the tens digit of the score to a character
+            score_string[1] = score % 10 + '0'; // convert the ones digit of the score to a character
+            score_string[2] = '\0'; // terminate the string
 
             char output[1050];
-            strcpy(output, filename);
-            strcat(output, ":");
-            strcat(output, score_string);
+            strcpy(output, filename); // copy the filename to the output string
+            strcat(output, ":"); // append a colon to the output string
+            strcat(output, score_string); // append the score to the output string
 
             int check;
-            check = write(fd, output, strlen(output)); 
-            if(check == -1){
-                perror(strerror(errno));
-                exit(errno);
+            check = write(fd, output, strlen(output)); // write the output string to the file
+            if(check == -1){ // check if writing to the file failed
+                perror(strerror(errno)); // print an error message
+                exit(errno); // exit with an error code
             }
 
-            close(fd);
+            close(fd); // close the file
         }
 
-        else{
+        else{ // if the file does not have a .c extension
 
             printf("The number of lines in this file is:\n");
             int check;
-            check = execlp("wc", "wc", "-l", path, NULL);
+            check = execlp("wc", "wc", "-l", path, NULL); // execute the wc command to count the number of lines in the file
 
-            if(check == -1){
-                perror(strerror(errno));
-                exit(errno);
+            if(check == -1){ // check if executing the command failed
+                perror(strerror(errno)); // print an error message
+                exit(errno); // exit with an error code
             }
             
         } 
 
-        //exit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS); // exit the child process with a success code
     }
 
-    else if(pid2 > 0){
-        wait_for_children();
+    else if(pid2 > 0){ // parent process
+        wait_for_children(); // wait for all child processes to finish
     }  
 }
 
@@ -305,31 +320,35 @@ void create_new_file(char* path, struct stat buf){
     }
 }
 
-void change_link_permissions(char* path, struct stat buf){
+void change_link_permissions(char* path, struct stat buf) {
     pid_t pid2;
-    
+
+    // Create a child process
     pid2 = fork();
-    if(pid2 < 0){
+    if (pid2 < 0) {
+        // If fork() fails, print an error message and exit
         perror(strerror(errno));
         exit(errno);
     }
 
-    if(pid2==0){
+    if (pid2 == 0) {
+        // If the current process is the child process
         int check;
 
+        // Use the "chmod" command to change the file permissions of the file
         check = execlp("chmod", "chmod", "u+rwx,g+rw-x,o-rwx", path, NULL);
-        if(check == -1){
+        if (check == -1) {
+            // If execlp() fails, print an error message and exit
             perror(strerror(errno));
             exit(errno);
         }
 
-        /*printf("The new acces rights are:\n");
-        print_access_rights(buf);
-
-        exit(EXIT_SUCCESS);*/
+        // Exit the child process with a success status
+        //exit(EXIT_SUCCESS);
     }
 
-    else if(pid2>0){
+    else if (pid2 > 0) {
+        // If the current process is the parent process
         wait_for_children();
     }
 }
